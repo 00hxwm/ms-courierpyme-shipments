@@ -45,13 +45,13 @@ public class EnvioController {
     }
 
     @GetMapping("/tracking/{codigo}")
-    @PreAuthorize("hasAnyRole('Admin','Operador','Cliente')")
     public ResponseEntity<?> rastrear(@PathVariable String codigo) {
-        log.info("Consulta de tracking");
         return envioRepository.findByCodigoSeguimiento(codigo)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Código de seguimiento no encontrado")));
+            .<ResponseEntity<?>>map(e -> ResponseEntity.ok(Map.of(
+                "codigoSeguimiento", e.getCodigoSeguimiento(),
+                "estado", e.getEstado())))
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Código de seguimiento no encontrado")));
     }
 
     @PostMapping
