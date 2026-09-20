@@ -32,7 +32,10 @@ private String codigoSeguimiento;
     public void prePersist() {
         this.fechaCreacion = LocalDateTime.now();
         if (this.estado == null) {
-            this.estado = "PENDIENTE";
+            this.estado = "CREADO";
+        }
+        if (this.codigoSeguimiento == null || this.codigoSeguimiento.isBlank()) {
+            this.codigoSeguimiento = "RX-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         }
     }
 
