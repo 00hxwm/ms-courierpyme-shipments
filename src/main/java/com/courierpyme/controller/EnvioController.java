@@ -1,5 +1,6 @@
 package com.courierpyme.controller;
 
+import com.courierpyme.messaging.ShipmentEventPublisher;
 import com.courierpyme.model.Envio;
 import com.courierpyme.model.EstadoEnvio;
 import com.courierpyme.repository.EnvioRepository;
@@ -21,9 +22,11 @@ public class EnvioController {
 
     private static final Logger log = LoggerFactory.getLogger(EnvioController.class);
     private final EnvioRepository envioRepository;
+    private final ShipmentEventPublisher publisher;
 
-    public EnvioController(EnvioRepository envioRepository) {
+    public EnvioController(EnvioRepository envioRepository, ShipmentEventPublisher publisher) {
         this.envioRepository = envioRepository;
+        this.publisher = publisher;
     }
 
     @GetMapping
@@ -62,7 +65,9 @@ public class EnvioController {
         if (nuevo.getCodigoSeguimiento() == null || nuevo.getCodigoSeguimiento().isBlank()) {
             nuevo.setCodigoSeguimiento("RX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(envioRepository.save(nuevo));
+        Envio guardado = envioRepository.save(nuevo);
+        publisher.publicarEnvioCreado(guardado);
+        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
     }
 
     @PutMapping("/{id}/status")
